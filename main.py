@@ -1,16 +1,23 @@
-# This is a sample Python script.
+from fastapi import Depends, FastAPI, Header, HTTPException
+from .routers import catalogs, categories
 
-# Press F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+app = FastAPI()
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+async def get_token_header(x_token: str = Header(...)):
+    if x_token != "fake-super-secret-token":
+        raise HTTPException(status_code=400, detail="X-Token header invalid")
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+app.include_router(
+    catalogs.router
+
+)
+
+app.include_router(
+    categories.router,
+    prefix="/categories",
+    tags=["items"],
+    dependencies=[Depends(get_token_header)],
+    responses={404: {"description": "Not found"}},
+)
