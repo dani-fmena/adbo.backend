@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from utils.definitions import TAGS
+from viewmodels.vmCategory import CategoryIn
 
 router = APIRouter()
 
@@ -12,6 +12,9 @@ async def get_categories():
     ]
 
 
-@router.get("/{id}")
-async def get_category():
+@router.get("/{id}", response_model=CategoryIn)
+async def get_category(id: int):
     return {"name": "films"}
+
+
+

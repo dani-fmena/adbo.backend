@@ -1,23 +1,18 @@
-from fastapi import Depends, FastAPI, Header, HTTPException
-from .routers import catalogs, categories
+import uvicorn
+from fastapi import FastAPI
+from api.routes import adbo_router
 
-app = FastAPI()
-
-
-async def get_token_header(x_token: str = Header(...)):
-    if x_token != "fake-super-secret-token":
-        raise HTTPException(status_code=400, detail="X-Token header invalid")
-
-
-app.include_router(
-    catalogs.router
-
+app = FastAPI(
+    title="AdbO Backend Solution",
+    description="This is the backend API for the entire AdbO Solution",
+    version="0.0.0",
+    redoc_url=None
 )
 
-app.include_router(
-    categories.router,
-    prefix="/categories",
-    tags=["items"],
-    dependencies=[Depends(get_token_header)],
-    responses={404: {"description": "Not found"}},
-)
+app.include_router(adbo_router)
+
+
+# just for debugging purpose
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
