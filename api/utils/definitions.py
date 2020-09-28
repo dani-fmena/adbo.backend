@@ -11,12 +11,19 @@ class TAGS:
 
 
 class SDES:  # http status code description
-    NOTFOUND: Dict[str, str] = {"description": "Not found"}
+    NOTFOUND: Dict[str, str] = {"description": "Entity not found"}
     FORBIDDEN: Dict[str, str] = {"description": "Forbidden"}
     CREATED: Dict[str, str] = {"description": "Created"}
+    NOCONTENT: Dict[str, str] = {"description": "There is no content"}
 
 
-class SCODE:  # http status code number
-    c404: int = 404
-    c403: int = 403
-    c201: int = 201
+tags_metadata = [
+    {
+        "name": TAGS.CATALOG,
+        "description": "Catalogs operations",
+    },
+    {
+        "name": TAGS.CATEGORY,
+        "description": "Category operations",
+    }
+]
