@@ -15,6 +15,7 @@ class SDES:  # http status code description
     FORBIDDEN: Dict[str, str] = {"description": "Forbidden"}
     CREATED: Dict[str, str] = {"description": "Created"}
     NOCONTENT: Dict[str, str] = {"description": "There is no content"}
+    BADREQUEST: Dict[str, str] = {"description": "The request is invalid"}
 
 
 tags_metadata = [

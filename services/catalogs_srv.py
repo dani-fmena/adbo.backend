@@ -13,7 +13,8 @@ class CatalogService(BaseService):
         return await CatalogDB.get_all()
 
     async def get_catalog(self, catalog_id: str) -> Union[None, Catalog]:
-        result_db = await CatalogDB.get(catalog_id)
+        object_id_dto = self.chk_object_id(catalog_id)
+        result_db = await CatalogDB.get(object_id_dto)
 
         if result_db is None: self.RiseHTTP_NotFound()
         return result_db
@@ -28,7 +29,8 @@ class CatalogService(BaseService):
         return result_db
 
     async def delete(self, catalog_id: str) -> Union[None, Catalog]:
-        result_db = await CatalogDB.delete(catalog_id)
+        object_id_dto = self.chk_object_id(catalog_id)
+        result_db = await CatalogDB.delete(object_id_dto)
 
         if result_db is None: self.RiseHTTP_NotFound()
         return result_db

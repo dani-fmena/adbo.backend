@@ -54,14 +54,14 @@ class CatalogDB:
         return catalogs
 
     @staticmethod
-    async def get(catalog_id: str) -> Union[None, Catalog]:
+    async def get(catalog_object_id: ObjectId) -> Union[None, Catalog]:
         """
         Get a specific catalog and try to find it
 
         :return: The catalog to find or None if ir's missing
         """
         collection = CatalogDB.__db_collection()
-        new_catalog = await collection.find_one({"_id": ObjectId(catalog_id)})
+        new_catalog = await collection.find_one({"_id": catalog_object_id})
 
         if new_catalog: return Catalog(**new_catalog)
         else: return None
@@ -103,11 +103,11 @@ class CatalogDB:
 
 
     @staticmethod
-    async def delete(catalog_id: str) -> Union[None, Catalog]:
+    async def delete(catalog_object_id: ObjectId) -> Union[None, Catalog]:
         collection = CatalogDB.__db_collection()
-        catalog_db = await collection.find_one({"_id": ObjectId(catalog_id)})
+        catalog_db = await collection.find_one({"_id": catalog_object_id})
 
         if catalog_db:
-            await collection.delete_one({"_id": ObjectId(catalog_id)})
+            await collection.delete_one({"_id": catalog_object_id})
             return Catalog(**catalog_db)
         else: return None
