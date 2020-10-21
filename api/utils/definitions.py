@@ -1,10 +1,6 @@
 from typing import Final, Dict
 
 
-class CONFIGS:
-    MONGO_DETAILS = "mongodb://localhost:27017"         # TODO move this to a config or env file
-
-
 class TAGS:
     CATALOG: Final[str] = "Catalog"
     CATEGORY: Final[str] = "Category"

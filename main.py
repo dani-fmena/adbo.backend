@@ -1,7 +1,9 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from api.routes import adbo_router
 from api.utils.definitions import tags_metadata
+from config.config import CONFIGS
 
 app = FastAPI(
     title="AdbO Backend Solution",
@@ -11,10 +13,16 @@ app = FastAPI(
     openapi_tags=tags_metadata
 )
 
-app.include_router(adbo_router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CONFIGS.ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+app.include_router(adbo_router)
 
 # just for debugging purpose
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
+    uvicorn.run(app, host="0.0.0.0", port=8100)
