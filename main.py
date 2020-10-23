@@ -7,8 +7,8 @@ from config.config import CONFIGS
 
 app = FastAPI(
     title="AdbO Backend Solution",
-    description="This is the backend API for the entire AdbO Solution",
-    version="0.0.0",
+    description="This is the backend API for the entire AdbO system",
+    version="0.0.1",
     redoc_url=None,
     openapi_tags=tags_metadata
 )
