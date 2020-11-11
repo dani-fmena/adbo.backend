@@ -18,19 +18,25 @@ async def get_catalog(catalog_id: str, service: CatalogService = Depends()):
     return await service.get_catalog(catalog_id)
 
 
-@router.post("/", response_model=Catalog)
+@router.post("/", response_model=Catalog, status_code = status.HTTP_201_CREATED)
 async def create_catalog(catalog_req: Catalog, service: CatalogService = Depends()):
     return await service.create(catalog_req)
 
 
-@router.post("/{catalog_id}/enable", description = "Enable Catalog")
-async def enable_catalog(catalog_id: str, service: CatalogService = Depends()):
-    return await service.set_status(catalog_id, True)
+@router.post("/enable/{catalog_id}", description = "Enable Catalog", responses={status.HTTP_417_EXPECTATION_FAILED: SDES.EXPECTATIONFAIL})
+async def enable_catalog(catalog_id: str, response: Response, service: CatalogService = Depends()):
+    if await service.set_status(catalog_id, True): return
+    else:
+        response.status_code = status.HTTP_417_EXPECTATION_FAILED
+        return
 
 
-@router.post("/{catalog_id}/disable", description = "Disable Catalog")
-async def disable_catalog(catalog_id: str, service: CatalogService = Depends()):
-    return await service.set_status(catalog_id, False)
+@router.post("/disable/{catalog_id}", description = "Disable Catalog", responses={status.HTTP_417_EXPECTATION_FAILED: SDES.EXPECTATIONFAIL})
+async def disable_catalog(catalog_id: str, response: Response, service: CatalogService = Depends()):
+    if await service.set_status(catalog_id, False): return
+    else:
+        response.status_code = status.HTTP_417_EXPECTATION_FAILED
+        return
 
 
 @router.put("/", response_model=Catalog)

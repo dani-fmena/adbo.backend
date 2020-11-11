@@ -12,6 +12,7 @@ class SDES:  # http status code description
     CREATED: Dict[str, str] = {"description": "Created"}
     NOCONTENT: Dict[str, str] = {"description": "There is no content"}
     BADREQUEST: Dict[str, str] = {"description": "The request is invalid"}
+    EXPECTATIONFAIL: Dict[str, str] = {"description": "The operation failed"}
 
 
 tags_metadata = [
