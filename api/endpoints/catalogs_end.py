@@ -23,6 +23,16 @@ async def create_catalog(catalog_req: Catalog, service: CatalogService = Depends
     return await service.create(catalog_req)
 
 
+@router.post("/{catalog_id}/enable", description = "Enable Catalog")
+async def enable_catalog(catalog_id: str, service: CatalogService = Depends()):
+    return await service.set_status(catalog_id, True)
+
+
+@router.post("/{catalog_id}/disable", description = "Disable Catalog")
+async def disable_catalog(catalog_id: str, service: CatalogService = Depends()):
+    return await service.set_status(catalog_id, False)
+
+
 @router.put("/", response_model=Catalog)
 async def update_catalog(catalog_req: Catalog, service: CatalogService = Depends()):
     return await service.update(catalog_req)

@@ -34,3 +34,10 @@ class CatalogService(BaseService):
 
         if result_db is None: self.RiseHTTP_NotFound()
         return result_db
+
+    async def set_status (self, catalog_id: str, new_status: bool) -> Union[None, Catalog]:
+        object_id_dto = self.chk_object_id(catalog_id)
+        result_db = await CatalogDB.set_status(object_id_dto, new_status)
+
+        if result_db is None: self.RiseHTTP_NotFound()
+        return result_db
