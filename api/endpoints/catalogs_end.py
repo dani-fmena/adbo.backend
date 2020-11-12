@@ -9,8 +9,10 @@ router = APIRouter()
 @router.get("/", responses={status.HTTP_204_NO_CONTENT: SDES.NOCONTENT})
 async def get_catalogs(response: Response, service: CatalogService = Depends()):
     catalogs = await service.get_all()
-    if len(catalogs) < 1: response.status_code = status.HTTP_204_NO_CONTENT
-    return catalogs
+    if len(catalogs) > 1: return catalogs
+
+    response.status_code = status.HTTP_204_NO_CONTENT
+    return response
 
 
 @router.get("/{catalog_id}", response_model=Catalog, responses={status.HTTP_400_BAD_REQUEST: SDES.BADREQUEST})
