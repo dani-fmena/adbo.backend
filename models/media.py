@@ -25,6 +25,7 @@ class GameGenre(Enum):
     moba = "moba"
 
 
+
 class Media(EntityM, DateEntity):
     # TODO POSTER field. When upload a file image, cropped it to several sizes. You have to maintains the original in the physical folder for manual copy
     name: str                       = Field(description = "Name of the media folder", max_length = 60)
@@ -35,7 +36,10 @@ class Media(EntityM, DateEntity):
     released: Optional[datetime]    = Field(description = "Release date of the media")
     price: int                      = Field(description = "Integer representation of the price of the media")
     size: int                       = Field(description = "Integer representation of the size in MB")
-    folders: Optional[List[str]]    = Field(description = "List of children folders")                                   # This could represent seasons of a series
+    folders: Optional[List[str]]    = Field(description = "List of children folders")
+    # FIXME I think we need to have a enum genre for generic media.
+    # thing we need to have a table for entity-type / categories and relate to each entity-type / categories the kind of processing, remember one catalog one entity-type / category
+    # This could represent seasons of a series
 
 
 class Film(Media):

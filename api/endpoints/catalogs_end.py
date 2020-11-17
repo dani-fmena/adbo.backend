@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Response, status
+from typing import List
 from models.catalog import Catalog
 from services.catalogs_srv import CatalogService
 from api.utils.definitions import SDES
@@ -9,7 +10,7 @@ router = APIRouter()
 @router.get("/", responses={status.HTTP_204_NO_CONTENT: SDES.NOCONTENT})
 async def get_catalogs(response: Response, service: CatalogService = Depends()):
     catalogs = await service.get_all()
-    if len(catalogs) > 1: return catalogs
+    if len(catalogs) > 0: return catalogs
 
     response.status_code = status.HTTP_204_NO_CONTENT
     return response
@@ -49,3 +50,10 @@ async def update_catalog(catalog_req: Catalog, service: CatalogService = Depends
 @router.delete("/{catalog_id}", response_model=Catalog, responses={status.HTTP_400_BAD_REQUEST: SDES.BADREQUEST})
 async def delete_catalog(catalog_id: str, service: CatalogService = Depends()):
     return await service.delete(catalog_id)
+
+
+@router.post("/bulk/enable", description = "Bulks ops to enable certain amount of catalogs")
+async def enable_bulk_catalogs(catalog_ids: List[str]):
+    print(catalog_ids)
+    return {}
+
