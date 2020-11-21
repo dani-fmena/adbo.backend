@@ -1,4 +1,4 @@
-from pymongo.results import UpdateResult
+from pymongo.results import UpdateResult, InsertOneResult, DeleteResult
 from pymongo.collection import Collection
 from datetime import datetime
 from typing import Union, Dict, Any
@@ -88,7 +88,7 @@ class CatalogDB:
         CatalogDB.__id_sanitation(catalog_dto)                                                          # if the dto has id, we remove it
         CatalogDB.__date_sanitation(SanitationMode.rm_update_date, catalog_dto)                         # Update date sanitation
 
-        q_result = await collection.insert_one(catalog_dto.dict(by_alias=True))
+        q_result: InsertOneResult = await collection.insert_one(catalog_dto.dict(by_alias = True))
         new_catalog = await collection.find_one({"_id": q_result.inserted_id})
 
         return Catalog(**new_catalog)
@@ -96,18 +96,15 @@ class CatalogDB:
     @staticmethod
     async def update(catalog_dto: Catalog) -> Union[None, Catalog]:
         collection = CatalogDB.__db_collection()
-        q_result = collection.find_one({"_id": catalog_dto.id})                                         # as 'find_one' is an promise, if we don't await, we receive a Future (promise like)
 
-        if q_result:
-            CatalogDB.__date_sanitation(SanitationMode.rm_create_date, catalog_dto)                     # Update date sanitation
-            catalog_dto.updatedAt = datetime.utcnow()
+        CatalogDB.__date_sanitation(SanitationMode.rm_create_date, catalog_dto)                         # Update date sanitation
+        catalog_dto.updatedAt = datetime.utcnow()
 
-            await collection.update_one({"_id": catalog_dto.id}, {"$set": catalog_dto.dict(by_alias=True, exclude_none=True)})
-            catalog_db = await collection.find_one({"_id": catalog_dto.id})
+        q_result: UpdateResult = await collection.update_one({"_id": catalog_dto.id}, {"$set": catalog_dto.dict(by_alias = True, exclude_none = True)})
+        if q_result.modified_count == 0 and q_result.matched_count == 0: return None
 
-            return Catalog(**catalog_db)
-        else: return None
-
+        catalog_db = await collection.find_one({"_id": catalog_dto.id})
+        return Catalog(**catalog_db)
 
     @staticmethod
     async def delete(catalog_object_id: ObjectId) -> Union[None, Catalog]:
@@ -119,29 +116,28 @@ class CatalogDB:
             return Catalog(**catalog_db)
         else: return None
 
-
     @staticmethod
-    async def set_status(catalog_object_id: ObjectId, new_status: bool) -> Union[None, Catalog]:
+    async def set_status(catalog_object_id: ObjectId, new_status: bool) -> Union[None, bool]:
         """
         Set a new status for the Catalog, according to the new_status parameter.
 
         :rtype: Catalog
         """
         collection = CatalogDB.__db_collection()
-        catalog_db: Dict[str, Any] = await collection.find_one({"_id": catalog_object_id})
 
-        if catalog_db:
-            if catalog_db['isEnable'] == new_status: return Catalog(**catalog_db)
+        q_result: UpdateResult = await collection.update_one(
+            {"_id": catalog_object_id},
+            {"$set": {
+                "isEnable":  new_status,
+                "updatedAt": datetime.utcnow()
+            }}
+        )
 
-            catalog_db['updatedAt'] = datetime.utcnow()
-            catalog_db['isEnable'] = new_status
-
-            await collection.update_one({"_id": catalog_object_id}, {"$set": catalog_db})
-            return Catalog(**catalog_db)
-        else: return None
+        if q_result.modified_count == 0 and q_result.matched_count == 0: return None
+        return True
 
     @staticmethod
-    async def bulk_enable(ids: List[ObjectId]) -> bool:
+    async def bulk_enable(ids: List[ObjectId]) -> Union[None, bool]:
         """
         Enable the IDs object in bulk (update_many)
 
@@ -159,4 +155,4 @@ class CatalogDB:
             }}
         )
 
-        return True if q_result else False                                               # Python ternary operator
+        return True if q_result else None                                               # Python ternary operator
