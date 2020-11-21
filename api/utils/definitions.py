@@ -12,7 +12,8 @@ class SDES:  # http status code description
     CREATED: Dict[str, str] = {"description": "Created"}
     NOCONTENT: Dict[str, str] = {"description": "There is no content"}
     BADREQUEST: Dict[str, str] = {"description": "The request is invalid"}
-    EXPECTATIONFAIL: Dict[str, str] = {"description": "The operation failed because the input data was invalid"}
+    EXPECTATIONFAIL: Dict[str, str] = {"description": "Data access layer fail the ops"}
+    UNPROCESSABLEENTITY: Dict[str, str] = {"description": "Something is wrong with the input"}
 
 
 tags_metadata = [

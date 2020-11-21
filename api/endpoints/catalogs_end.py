@@ -52,8 +52,9 @@ async def delete_catalog(catalog_id: str, service: CatalogService = Depends()):
     return await service.delete(catalog_id)
 
 
-@router.post("/bulk/enable", description = "Bulks ops to enable certain amount of catalogs")
-async def enable_bulk_catalogs(catalog_ids: List[str]):
-    print(catalog_ids)
-    return {}
-
+@router.post("/bulk/enable", description = "Bulks ops to enable certain amount of catalogs", responses = {status.HTTP_422_UNPROCESSABLE_ENTITY: SDES.UNPROCESSABLEENTITY})
+async def enable_bulk_catalogs(catalog_ids: List[str], response: Response, service: CatalogService = Depends()):
+    if await service.bulk_enable(catalog_ids): return
+    else:
+        response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+        return

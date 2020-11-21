@@ -1,3 +1,5 @@
+from pymongo.results import UpdateResult
+from pymongo.collection import Collection
 from datetime import datetime
 from typing import Union, Dict, Any
 from bson import ObjectId
@@ -20,7 +22,7 @@ class CatalogDB:
     """
 
     @staticmethod
-    def __db_collection():
+    def __db_collection() -> Collection:
         return db.get_collection("catalogs")
 
     @staticmethod
@@ -137,3 +139,24 @@ class CatalogDB:
             await collection.update_one({"_id": catalog_object_id}, {"$set": catalog_db})
             return Catalog(**catalog_db)
         else: return None
+
+    @staticmethod
+    async def bulk_enable(ids: List[ObjectId]) -> bool:
+        """
+        Enable the IDs object in bulk (update_many)
+
+        :param ids:
+        :return:
+        """
+        collection = CatalogDB.__db_collection()
+        updated_at = datetime.utcnow()
+
+        q_result: UpdateResult = await collection.update_many(
+            {"_id": {"$in": ids}},
+            {"$set": {
+                "isEnable": True,
+                "updatedAt": updated_at
+            }}
+        )
+
+        return True if q_result else False                                               # Python ternary operator
