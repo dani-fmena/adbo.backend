@@ -1,7 +1,7 @@
 from pymongo.results import UpdateResult, InsertOneResult, DeleteResult
 from pymongo.collection import Collection
 from datetime import datetime
-from typing import Union, Dict, Any
+from typing import Union
 from bson import ObjectId
 from enum import Enum
 from api.database import db
@@ -69,13 +69,13 @@ class CatalogDB:
         :return: The catalog to find or None if ir's missing
         """
         collection = CatalogDB.__db_collection()
-        new_catalog = await collection.find_one({"_id": catalog_object_id})
+        db_catalog = await collection.find_one({"_id": catalog_object_id})
 
-        if new_catalog: return Catalog(**new_catalog)
+        if db_catalog: return Catalog(**db_catalog)
         else: return None
 
     @staticmethod
-    async def create(catalog_dto: Catalog) -> Catalog:
+    async def create(catalog_dto: Catalog) -> Union[bool, InsertOneResult]:
         """
         Created a new catalog in to the database
 
@@ -88,36 +88,39 @@ class CatalogDB:
         CatalogDB.__id_sanitation(catalog_dto)                                                          # if the dto has id, we remove it
         CatalogDB.__date_sanitation(SanitationMode.rm_update_date, catalog_dto)                         # Update date sanitation
 
-        q_result: InsertOneResult = await collection.insert_one(catalog_dto.dict(by_alias = True))
-        new_catalog = await collection.find_one({"_id": q_result.inserted_id})
+        try: q_result: InsertOneResult = await collection.insert_one(catalog_dto.dict(by_alias = True))
+        except: return False
 
-        return Catalog(**new_catalog)
+        return q_result
 
     @staticmethod
-    async def update(catalog_dto: Catalog) -> Union[None, Catalog]:
+    async def update(catalog_dto: Catalog) -> Union[bool, UpdateResult]:
         collection = CatalogDB.__db_collection()
 
         CatalogDB.__date_sanitation(SanitationMode.rm_create_date, catalog_dto)                         # Update date sanitation
         catalog_dto.updatedAt = datetime.utcnow()
 
-        q_result: UpdateResult = await collection.update_one({"_id": catalog_dto.id}, {"$set": catalog_dto.dict(by_alias = True, exclude_none = True)})
-        if q_result.modified_count == 0 and q_result.matched_count == 0: return None
+        try: q_result: UpdateResult = await collection.update_one(
+            {"_id": catalog_dto.id},
+            {"$set": catalog_dto.dict(by_alias = True, exclude_none = True)})
+        except: return False
 
-        catalog_db = await collection.find_one({"_id": catalog_dto.id})
-        return Catalog(**catalog_db)
+        return q_result
 
     @staticmethod
-    async def delete(catalog_object_id: ObjectId) -> Union[None, Catalog]:
+    async def delete(catalog_object_id: ObjectId) -> Union[None, bool, Catalog]:
         collection = CatalogDB.__db_collection()
         catalog_db = await collection.find_one({"_id": catalog_object_id})
 
         if catalog_db:
-            await collection.delete_one({"_id": catalog_object_id})
-            return Catalog(**catalog_db)
-        else: return None
+            try: await collection.delete_one({"_id": catalog_object_id})
+            except: return False                         # something was wrong
+        else: return None                                # 404
+
+        return Catalog(**catalog_db)
 
     @staticmethod
-    async def set_status(catalog_object_id: ObjectId, new_status: bool) -> Union[None, bool]:
+    async def set_status(catalog_object_id: ObjectId, new_status: bool) -> Union[bool, UpdateResult]:
         """
         Set a new status for the Catalog, according to the new_status parameter.
 
@@ -125,34 +128,56 @@ class CatalogDB:
         """
         collection = CatalogDB.__db_collection()
 
-        q_result: UpdateResult = await collection.update_one(
-            {"_id": catalog_object_id},
-            {"$set": {
-                "isEnable":  new_status,
-                "updatedAt": datetime.utcnow()
-            }}
-        )
+        try:
+            q_result: UpdateResult = await collection.update_one(
+                {"_id": catalog_object_id},
+                {"$set": {
+                    "isEnable":  new_status,
+                    "updatedAt": datetime.utcnow()
+                }}
+            )
+        except: return False
 
-        if q_result.modified_count == 0 and q_result.matched_count == 0: return None
-        return True
+        return q_result
 
     @staticmethod
-    async def bulk_enable(ids: List[ObjectId]) -> Union[None, bool]:
+    async def bulk_set_status(ids: List[ObjectId], new_status: bool) -> Union[bool, UpdateResult]:
         """
-        Enable the IDs object in bulk (update_many)
+        Enable or Disable the IDs object in bulk (update_many) according to the new_status parameter
 
-        :param ids:
+        :param new_status: The new status of the objects/documents
+        :param ids: The objects/documents to be changed
         :return:
         """
         collection = CatalogDB.__db_collection()
+        q_result: UpdateResult
+
         updated_at = datetime.utcnow()
 
-        q_result: UpdateResult = await collection.update_many(
-            {"_id": {"$in": ids}},
-            {"$set": {
-                "isEnable": True,
-                "updatedAt": updated_at
-            }}
-        )
+        try:
+             q_result = await collection.update_many(
+                {"_id": {"$in": ids}},
+                {"$set": {
+                    "isEnable":  new_status,
+                    "updatedAt": updated_at
+                }}
+            )
+        except: return False
 
-        return True if q_result else None                                               # Python ternary operator
+        return q_result
+
+    @staticmethod
+    async def bulk_remove(ids: List[ObjectId]) -> Union[None, bool]:
+        """
+        Remove the IDs object in bulk
+
+        :param ids: The objects/documents to be removed
+        :return:
+        """
+        collection = CatalogDB.__db_collection()
+        q_result: DeleteResult
+
+        try: q_result: DeleteResult = await collection.delete_many({"_id": {"$in": ids}})
+        except: return False
+
+        return True if q_result.deleted_count > 0 else None

@@ -16,7 +16,8 @@ class BaseService:
         :return: ObjectId
         """
         try: object_id = ObjectId(dto_id)
-        except InvalidId: self.RiseHTTP_BadRequest(self.invalid_id_error_info)
+        # except InvalidId: self.RiseHTTP_BadRequest(self.invalid_id_error_info)
+        except: self.RiseHTTP_BadRequest(self.invalid_id_error_info)
         else: return object_id
 
     def chk_object_ids_list(self, dto_ids: List[str]) -> Union[None, List[ObjectId]]:
@@ -31,7 +32,8 @@ class BaseService:
 
         for str_id in dto_ids:
             try: object_id = ObjectId(str_id)
-            except InvalidId: self.RiseHTTP_BadRequest(self.invalid_id_error_info)
+            # except InvalidId: self.RiseHTTP_BadRequest(self.invalid_id_error_info)
+            except: self.RiseHTTP_BadRequest(self.invalid_id_error_info)
             else: bson_list.append(object_id)
 
         return bson_list
@@ -40,5 +42,11 @@ class BaseService:
     def RiseHTTP_NotFound(self, details: str = SDES.NOTFOUND):
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = details)
 
-    def RiseHTTP_BadRequest(self, details: str = SDES.BADREQUEST):
+    def RiseHTTP_BadRequest(self, details: str = SDES.BAD_REQUEST):
         raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST, detail = details)
+
+    def RiseHTTP_DataLayerEmptyOps(self, details: str = SDES.DAL_FAIL_EMPTY):
+        raise HTTPException(status_code = status.HTTP_417_EXPECTATION_FAILED, detail = details)
+
+    def RiseHTTP_DataLayerFail(self, details: str = SDES.DAL_FAIL):
+        raise HTTPException(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, detail = details)
