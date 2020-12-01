@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Response, status
-from typing import List
+from typing import List, Union
 from models.catalog import Catalog
 from services.catalogs_srv import CatalogService
 from api.utils.definitions import SDES
@@ -8,8 +8,10 @@ router = APIRouter()
 
 
 @router.get("/", responses={status.HTTP_204_NO_CONTENT: SDES.NO_CONTENT})
-async def get_catalogs(response: Response, service: CatalogService = Depends()):
-    catalogs = await service.get_all()
+async def get_catalogs(response: Response, service: CatalogService = Depends(), skip: Union[int, None] = None, limit: Union[int, None] = None):
+    if skip is None: catalogs = await service.get_all()
+    else: catalogs = await service.get_catalog_paginated(skip, limit)
+
     if len(catalogs) > 0: return catalogs
 
     response.status_code = status.HTTP_204_NO_CONTENT

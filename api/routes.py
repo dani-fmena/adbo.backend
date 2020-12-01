@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status
-from api.endpoints import categories_end, catalogs_end
+from api.endpoints import categories_end, catalogs_end, dev_end
 from api.utils.definitions import SDES, TAGS
 
 
@@ -22,5 +22,14 @@ adbo_router.include_router(
     responses={
         status.HTTP_404_NOT_FOUND: SDES.NOTFOUND,
         status.HTTP_403_FORBIDDEN: SDES.FORBIDDEN,
+    },
+)
+
+adbo_router.include_router(
+    dev_end.router,
+    prefix="/dev",
+    tags=[TAGS.DEV],
+    responses={
+        status.HTTP_404_NOT_FOUND: SDES.NOTFOUND,
     },
 )

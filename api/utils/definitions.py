@@ -4,6 +4,7 @@ from typing import Final, Dict
 class TAGS:
     CATALOG: Final[str] = "Catalog"
     CATEGORY: Final[str] = "Category"
+    DEV: Final[str] = "Development Only"
 
 
 class SDES:  # http status code description

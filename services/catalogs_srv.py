@@ -15,10 +15,11 @@ class CatalogService(BaseService):
     def __init__(self):
         self.db_repo = CatalogDB()
 
-
     async def get_all(self) -> List[Catalog]:
         return await self.db_repo.get_all()
 
+    async def get_catalog_paginated(self, skip: int, limit: int) -> List[Catalog]:
+        return await self.db_repo.get_paginated(skip, limit)
 
     async def get_catalog(self, catalog_id: str) -> Union[None, Catalog]:
         object_id_dto = self.chk_object_id(catalog_id)
@@ -26,7 +27,6 @@ class CatalogService(BaseService):
 
         if result_db is None: self.RiseHTTP_NotFound()
         return result_db
-
 
     async def create(self, catalog_dto: Catalog) -> Union[None, Catalog]:
         op_result = await self.db_repo.create(catalog_dto)

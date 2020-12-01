@@ -1,51 +1,20 @@
-from pymongo.results import UpdateResult, InsertOneResult, DeleteResult
-from pymongo.collection import Collection
+from typing import List
+from bson import ObjectId
 from datetime import datetime
 from typing import Union
-from bson import ObjectId
-from enum import Enum
-from api.database import db
+from pymongo.results import UpdateResult, InsertOneResult, DeleteResult
+from repository.db.base_db import BaseDB, SanitationMode
 from models.catalog import Catalog
-from typing import List
-from models.entity import EntityM, Entity, DateEntity
+from .dbcollections import DBCollections
 
 
-class SanitationMode (Enum):
-    rm_create_date = 1
-    rm_update_date = 2
-    rm_both_date = 3
-
-
-class CatalogDB:
+class CatalogDB(BaseDB):
     """
     Database access related to the catalog entity
     """
-    catalogs_db: Collection
 
     def __init__(self):
-        self.catalogs_db = db.get_collection('catalogs')
-
-    @staticmethod
-    def __date_sanitation(mode: Enum, dto: Union[DateEntity]):
-        """
-        Depending of the parameter, we reset the corresponding date field in the DTO, so the DTO dont
-        inject 'noise' and 'dirt' to the database.
-
-        :rtype: None
-        """
-        if mode == SanitationMode.rm_both_date:     # reset the -createdAt- and -createdAt- field
-            dto.createdAt = None
-            dto.updatedAt = None
-        if mode == SanitationMode.rm_update_date:   # reset the -updatedAt- field
-            dto.updatedAt = None
-        if mode == SanitationMode.rm_create_date:   # reset the -createdAt- field
-            dto.createdAt = None
-
-    @staticmethod
-    def __id_sanitation(dto: Union[EntityM, Entity]):
-        if hasattr(dto, 'id'): delattr(dto, 'id')
-
-
+        super().__init__(DBCollections.CATALOGS)
 
     async def get_all(self) -> List[Catalog]:
         """
@@ -55,7 +24,16 @@ class CatalogDB:
         """
         catalogs: List = []
 
-        async for catalog in self.catalogs_db.find():
+        async for catalog in self.collection.find():
+            catalogs.append(Catalog(**catalog))
+
+        return catalogs
+
+    async def get_paginated(self, skip: int, limit: int) -> List[Catalog]:
+        catalogs: List = []
+
+        # This pagination method have very poor performance, but allows random navigation through pages.
+        async for catalog in self.collection.find().skip(skip).limit(limit):
             catalogs.append(Catalog(**catalog))
 
         return catalogs
@@ -67,7 +45,7 @@ class CatalogDB:
         :return: The catalog to find or None if ir's missing
         """
 
-        db_catalog = await self.catalogs_db.find_one({"_id": catalog_object_id})
+        db_catalog = await self.collection.find_one({"_id": catalog_object_id})
 
         if db_catalog: return Catalog(**db_catalog)
         else: return None
@@ -84,7 +62,7 @@ class CatalogDB:
         self.__id_sanitation(catalog_dto)                                                          # if the dto has id, we remove it
         self.__date_sanitation(SanitationMode.rm_update_date, catalog_dto)                         # Update date sanitation
 
-        try: q_result: InsertOneResult = await self.catalogs_db.insert_one(catalog_dto.dict(by_alias = True))
+        try: q_result: InsertOneResult = await self.collection.insert_one(catalog_dto.dict(by_alias = True))
         except: return False
 
         return q_result
@@ -94,7 +72,7 @@ class CatalogDB:
         self.__date_sanitation(SanitationMode.rm_create_date, catalog_dto)                         # Update date sanitation
         catalog_dto.updatedAt = datetime.utcnow()
 
-        try: q_result: UpdateResult = await self.catalogs_db.update_one(
+        try: q_result: UpdateResult = await self.collection.update_one(
             {"_id": catalog_dto.id},
             {"$set": catalog_dto.dict(by_alias = True, exclude_none = True)})
         except: return False
@@ -102,10 +80,10 @@ class CatalogDB:
         return q_result
 
     async def delete(self, catalog_object_id: ObjectId) -> Union[None, bool, Catalog]:
-        catalog_db = await self.catalogs_db.find_one({"_id": catalog_object_id})
+        catalog_db = await self.collection.find_one({"_id": catalog_object_id})
 
         if catalog_db:
-            try: await self.catalogs_db.delete_one({"_id": catalog_object_id})
+            try: await self.collection.delete_one({"_id": catalog_object_id})
             except: return False                         # something was wrong
         else: return None                                # 404
 
@@ -119,7 +97,7 @@ class CatalogDB:
         """
 
         try:
-            q_result: UpdateResult = await self.catalogs_db.update_one(
+            q_result: UpdateResult = await self.collection.update_one(
                 {"_id": catalog_object_id},
                 {"$set": {
                     "isEnable":  new_status,
@@ -143,7 +121,7 @@ class CatalogDB:
         updated_at = datetime.utcnow()
 
         try:
-            q_result = await self.catalogs_db.update_many(
+            q_result = await self.collection.update_many(
                 {"_id": {"$in": ids}},
                 {"$set": {
                     "isEnable":  new_status,
@@ -163,7 +141,7 @@ class CatalogDB:
         """
         q_result: DeleteResult
 
-        try: q_result: DeleteResult = await self.catalogs_db.delete_many({"_id": {"$in": ids}})
+        try: q_result: DeleteResult = await self.collection.delete_many({"_id": {"$in": ids}})
         except: return False
 
         return True if q_result.deleted_count > 0 else None

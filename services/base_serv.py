@@ -1,7 +1,7 @@
 from typing import Union, List, Final
 from fastapi import HTTPException, status
 from api.utils.definitions import SDES
-from bson.objectid import ObjectId, InvalidId
+from bson.objectid import ObjectId
 
 
 class BaseService:
