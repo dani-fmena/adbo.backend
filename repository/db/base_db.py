@@ -20,7 +20,7 @@ class BaseDB:
     def __init__(self, db_collection_name: str):
         self.collection = db.get_collection(db_collection_name)
 
-    def __date_sanitation(self, mode: Enum, dto: Union[DateEntity]):
+    def date_sanitation(self, mode: Enum, dto: Union[DateEntity]):
         """
         Depending of the parameter, we reset the corresponding date field in the DTO, so the DTO dont
         inject 'noise' and 'dirt' to the database.
@@ -35,6 +35,6 @@ class BaseDB:
         if mode == SanitationMode.rm_create_date:  # reset the -createdAt- field
             dto.createdAt = None
 
-    def __id_sanitation(self, dto: Union[EntityM, Entity]):
+    def id_sanitation(self, dto: Union[EntityM, Entity]):
         if hasattr(dto, 'id'): delattr(dto, 'id')
 

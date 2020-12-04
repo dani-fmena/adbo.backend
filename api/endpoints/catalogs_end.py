@@ -7,7 +7,7 @@ from api.utils.definitions import SDES
 router = APIRouter()
 
 
-@router.get("/", responses={status.HTTP_204_NO_CONTENT: SDES.NO_CONTENT})
+@router.get("/", responses = {status.HTTP_204_NO_CONTENT: SDES.NO_CONTENT})
 async def get_catalogs(response: Response, service: CatalogService = Depends(), skip: Union[int, None] = None, limit: Union[int, None] = None):
     if skip is None: catalogs = await service.get_all()
     else: catalogs = await service.get_catalog_paginated(skip, limit)
@@ -18,7 +18,12 @@ async def get_catalogs(response: Response, service: CatalogService = Depends(), 
     return response
 
 
-@router.get("/{catalog_id}", response_model=Catalog, responses={status.HTTP_400_BAD_REQUEST: SDES.BAD_REQUEST})
+@router.get("/count", description = "Get the total documents in the collection")
+async def get_count(service: CatalogService = Depends()):
+    return await service.get_count()
+
+
+@router.get("/{catalog_id}", response_model = Catalog, responses = {status.HTTP_400_BAD_REQUEST: SDES.BAD_REQUEST})
 async def get_catalog(catalog_id: str, service: CatalogService = Depends()):
     return await service.get_catalog(catalog_id)
 

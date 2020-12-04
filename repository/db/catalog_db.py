@@ -29,6 +29,9 @@ class CatalogDB(BaseDB):
 
         return catalogs
 
+    async def get_collection_count(self) -> int:
+        return await self.collection.estimated_document_count()
+
     async def get_paginated(self, skip: int, limit: int) -> List[Catalog]:
         catalogs: List = []
 
@@ -59,8 +62,9 @@ class CatalogDB(BaseDB):
         """
 
         catalog_dto.createdAt = datetime.utcnow()
-        self.__id_sanitation(catalog_dto)                                                          # if the dto has id, we remove it
-        self.__date_sanitation(SanitationMode.rm_update_date, catalog_dto)                         # Update date sanitation
+
+        self.id_sanitation(catalog_dto)                                                          # if the dto has id, we remove it
+        self.date_sanitation(SanitationMode.rm_update_date, catalog_dto)                         # Update date sanitation
 
         try: q_result: InsertOneResult = await self.collection.insert_one(catalog_dto.dict(by_alias = True))
         except: return False
@@ -69,7 +73,7 @@ class CatalogDB(BaseDB):
 
     async def update(self, catalog_dto: Catalog) -> Union[bool, UpdateResult]:
 
-        self.__date_sanitation(SanitationMode.rm_create_date, catalog_dto)                         # Update date sanitation
+        self.date_sanitation(SanitationMode.rm_create_date, catalog_dto)                         # Update date sanitation
         catalog_dto.updatedAt = datetime.utcnow()
 
         try: q_result: UpdateResult = await self.collection.update_one(
