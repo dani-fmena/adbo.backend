@@ -21,7 +21,7 @@ class CatalogService(BaseService):
     async def get_count(self) -> int:
         return await self.db_repo.get_collection_count()
 
-    async def get_catalog_paginated(self, skip: int, limit: int) -> List[Catalog]:
+    async def get_catalogs_paginated(self, skip: int, limit: int) -> List[Catalog]:
         return await self.db_repo.get_paginated(skip, limit)
 
     async def get_catalog(self, catalog_id: str) -> Union[None, Catalog]:
