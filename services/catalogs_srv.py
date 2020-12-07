@@ -1,6 +1,7 @@
 from typing import List, Union
 from models.catalog import Catalog
 from .base_serv import BaseService
+from api.utils.types import DQueryData
 from repository.db.catalog_db import CatalogDB
 from services.helpers import chunker
 from config.config import CONFIGS
@@ -21,8 +22,8 @@ class CatalogService(BaseService):
     async def get_count(self) -> int:
         return await self.db_repo.get_collection_count()
 
-    async def get_catalogs_paginated(self, skip: int, limit: int) -> List[Catalog]:
-        return await self.db_repo.get_paginated(skip, limit)
+    async def get_parametrized(self, query_data: DQueryData) -> List[Catalog]:
+        return await self.db_repo.get_parametrized(query_data)
 
     async def get_catalog(self, catalog_id: str) -> Union[None, Catalog]:
         object_id_dto = self.chk_object_id(catalog_id)

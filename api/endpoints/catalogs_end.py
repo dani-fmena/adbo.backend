@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, Response, status
 from typing import List
 from models.catalog import Catalog
-from api.extensions.common_query import pagination_q
+from api.extensions.common_query import dt_query_params
+from api.utils.types import DQueryData
 from services.catalogs_srv import CatalogService
 from api.utils.definitions import SDES
 
@@ -9,8 +10,8 @@ router = APIRouter()
 
 
 @router.get("/", responses = {status.HTTP_204_NO_CONTENT: SDES.NO_CONTENT})
-async def get_catalogs(response: Response, service: CatalogService = Depends(), pagination: dict = Depends(pagination_q)):
-    catalogs = await service.get_catalogs_paginated(pagination["skip"], pagination["limit"])
+async def get_catalogs(response: Response, service: CatalogService = Depends(), qd: DQueryData = Depends(dt_query_params)):       # qd means query data
+    catalogs = await service.get_parametrized(qd)
     if len(catalogs) > 0: return catalogs
 
     response.status_code = status.HTTP_204_NO_CONTENT

@@ -1,3 +1,4 @@
+import pymongo
 from typing import List
 from bson import ObjectId
 from datetime import datetime
@@ -5,6 +6,7 @@ from typing import Union
 from pymongo.results import UpdateResult, InsertOneResult, DeleteResult
 from repository.db.base_db import BaseDB, SanitationMode
 from models.catalog import Catalog
+from api.utils.types import DQueryData
 from .dbcollections import DBCollections
 
 
@@ -32,11 +34,19 @@ class CatalogDB(BaseDB):
     async def get_collection_count(self) -> int:
         return await self.collection.estimated_document_count()
 
-    async def get_paginated(self, skip: int, limit: int) -> List[Catalog]:
+    async def get_parametrized(self, qd: DQueryData) -> List[Catalog]:      # qd means query data
+        """
+        Gets the catalogs in a parametrized way with the query params
+        """
         catalogs: List = []
 
-        # This pagination method have very poor performance, but allows random navigation through pages.
-        async for catalog in self.collection.find().skip(skip).limit(limit):
+        # This pagination method have a very poor performance, but allows random navigation through pages.
+        if qd['dir'] == 'none' or qd['field'] == '':
+            catalogs_db = self.collection.find().skip(qd['skip']).limit(qd['limit'])
+        else:
+            catalogs_db = self.collection.find().skip(qd['skip']).limit(qd['limit']).sort(qd['field'], qd['dir'])
+
+        async for catalog in catalogs_db:
             catalogs.append(Catalog(**catalog))
 
         return catalogs

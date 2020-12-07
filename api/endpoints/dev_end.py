@@ -23,6 +23,7 @@ async def setup_db():
 
     catalogs_coll: Collection = db.get_collection(DBCollections.CATALOGS)
     catalogs_coll.create_index([("name", pymongo.ASCENDING)])
+
     return {'msg': 'Database Setup Done'}
 
 
@@ -32,7 +33,7 @@ async def seed_db():
 
     # Catalogs
     catalogs_coll: Collection = db.get_collection(DBCollections.CATALOGS)
-    for n in range(100): lst.append(
+    for n in range(25): lst.append(
         {
             "name": ''.join(random.choices(string.ascii_lowercase, k=6)),
             "size": 0,
