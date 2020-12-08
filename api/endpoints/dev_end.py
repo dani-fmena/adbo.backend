@@ -13,21 +13,23 @@ from repository.db.dbcollections import DBCollections
 router = APIRouter()
 
 
-@router.post("/setup", description = "Setup all the collections and indexes")
+@router.post("/setup", description = 'Setup all the collections and indexes')
 async def setup_db():
     # CATALOGS
     # try:
     #     await db.create_collection(DBCollections.CATALOGS)
     # except CollectionInvalid:
-    #     raise HTTPException(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, detail = DBCollections.CATALOGS + "already exist")
+    #     raise HTTPException(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, detail = DBCollections.CATALOGS + 'already exist')
 
     catalogs_coll: Collection = db.get_collection(DBCollections.CATALOGS)
-    catalogs_coll.create_index([("name", pymongo.ASCENDING)])
+    catalogs_coll.create_index([('name', 'text')], unique = True)
+
+    # << Another Table >>
 
     return {'msg': 'Database Setup Done'}
 
 
-@router.post("/seed", description = "Seeds the collections")
+@router.post("/seed", description = 'Seeds the collections')
 async def seed_db():
     lst: List[Dict] = []
 
@@ -35,10 +37,10 @@ async def seed_db():
     catalogs_coll: Collection = db.get_collection(DBCollections.CATALOGS)
     for n in range(25): lst.append(
         {
-            "name": ''.join(random.choices(string.ascii_lowercase, k=6)),
-            "size": 0,
-            "items": 0,
-            "isEnable": True if random.choice(range(1, 3)) < 2 else False
+            'name': ''.join(random.choices(string.ascii_lowercase, k=6)),
+            'size': 0,
+            'items': 0,
+            'isEnable': True if random.choice(range(1, 3)) < 2 else False
         }
     )
     catalogs_coll.insert_many(lst)

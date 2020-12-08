@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Response, status, HTTPException
 from typing import List
 from models.catalog import Catalog
 from api.extensions.common_query import dt_query_params
@@ -18,7 +18,7 @@ async def get_catalogs(response: Response, service: CatalogService = Depends(), 
     return response
 
 
-@router.get("/count", description = "Get the total documents in the collection")
+@router.get("/count", description = 'Get the total documents in the collection')
 async def get_count(service: CatalogService = Depends()):
     return await service.get_count()
 

@@ -7,14 +7,14 @@ router = APIRouter()
 @router.get("/")
 async def get_categories():
     return [
-        {"name": "films"},
-        {"name": "games"}
+        {'name': 'films'},
+        {'name': 'games'}
     ]
 
 
 @router.get("/{id}", response_model=CategoryIn)
 async def get_category(id: int):
-    return {"name": "films"}
+    return {'name': 'films'}
 
 
 

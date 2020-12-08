@@ -6,15 +6,15 @@ from pydantic import BaseModel, Field
 
 
 class DateEntity(BaseModel):
-    createdAt: Optional[datetime] = Field(description="DateTime for the creation instant of the entity")
-    updatedAt: Optional[datetime] = Field(description="DateTime for the update instant of the entity")
+    createdAt: Optional[datetime] = Field(description='DateTime for the creation instant of the entity')
+    updatedAt: Optional[datetime] = Field(description='DateTime for the update instant of the entity')
 
 
 class Entity(BaseModel):
     """
     General purpose base entity from Pydantic
     """
-    id: int = Field(description="The unique Id of the entity", ge=0)
+    id: int = Field(description='The unique Id of the entity', ge=0)
 
 
 class EntityM(BaseModel):

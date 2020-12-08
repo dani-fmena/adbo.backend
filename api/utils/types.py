@@ -1,8 +1,9 @@
-from typing import TypedDict
+from typing import TypedDict, Union
 
 
 class DQueryData (TypedDict):
     skip: int
     limit: int
-    field: str
-    dir: str
+    field: Union[str, None]
+    dir: Union[str, None]
+    search: Union[str, None]

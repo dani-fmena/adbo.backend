@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 
 
 class BaseService:
-    invalid_id_error_info: Final[str] = "The ID of the entity isn't valid."
+    invalid_id_error_info: Final[str] = 'The ID of the entity isn\'t valid.'
 
     # Validation methods
     def chk_object_id(self, dto_id: str) -> Union[None, ObjectId]:

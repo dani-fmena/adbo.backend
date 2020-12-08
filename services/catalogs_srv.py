@@ -3,7 +3,7 @@ from models.catalog import Catalog
 from .base_serv import BaseService
 from api.utils.types import DQueryData
 from repository.db.catalog_db import CatalogDB
-from services.helpers import chunker
+from services.utils.helpers import chunker
 from config.config import CONFIGS
 
 

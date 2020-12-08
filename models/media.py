@@ -7,22 +7,22 @@ from pydantic import Field
 
 
 class FilmGenre(Enum):
-    default = "default"
-    drama = "drama"
-    action = "action"
-    scifi = "science fiction"
-    animation = "animation"
+    default = 'default'
+    drama = 'drama'
+    action = 'action'
+    scifi = 'science fiction'
+    animation = 'animation'
 
 
 class GameGenre(Enum):
-    default = "default"
-    rpg = "rpg"
-    platform = "platform"
-    detective = "detective"
-    graphic_adventure = "graphic adventure"
-    rts = "rts"
-    simulation = "simulation"
-    moba = "moba"
+    default = 'default'
+    rpg = 'rpg'
+    platform = 'platform'
+    detective = 'detective'
+    graphic_adventure = 'graphic adventure'
+    rts = 'rts'
+    simulation = 'simulation'
+    moba = 'moba'
 
 
 

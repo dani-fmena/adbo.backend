@@ -3,4 +3,4 @@ from pydantic import Field
 
 
 class CatalogIn:
-    name: str = Field(description="The name of the Catalog", max_length=30)
+    name: str = Field(description='The name of the Catalog', max_length=30)

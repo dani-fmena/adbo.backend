@@ -1,4 +1,3 @@
-import pymongo
 from typing import List
 from bson import ObjectId
 from datetime import datetime
@@ -34,21 +33,21 @@ class CatalogDB(BaseDB):
     async def get_collection_count(self) -> int:
         return await self.collection.estimated_document_count()
 
-    async def get_parametrized(self, qd: DQueryData) -> List[Catalog]:      # qd means query data
+    async def get_parametrized(self, q: DQueryData) -> List[Catalog]:      # qd means query data
         """
         Gets the catalogs in a parametrized way with the query params
         """
+        # This kind of pagination have a very poor performance, but allows random navigation through pages.
         catalogs: List = []
 
-        # This pagination method have a very poor performance, but allows random navigation through pages.
-        if qd['dir'] == 'none' or qd['field'] == '':
-            catalogs_db = self.collection.find().skip(qd['skip']).limit(qd['limit'])
+        if q['dir'] is None or q['field'] is None:
+            catalogs_db = self.collection.find().skip(q['skip']).limit(q['limit']) if q['search'] is None \
+                else self.collection.find({'name': {'$regex': '.*' + q['search'] + '.*'}}).limit(q['limit'])
         else:
-            catalogs_db = self.collection.find().skip(qd['skip']).limit(qd['limit']).sort(qd['field'], qd['dir'])
+            catalogs_db = self.collection.find().skip(q['skip']).limit(q['limit']).sort(q['field'], q['dir']) if q['search'] is None \
+                else self.collection.find({'name': {'$regex': '.*' + q['search'] + '.*'}}).limit(q['limit']).sort(q['field'], q['dir'])
 
-        async for catalog in catalogs_db:
-            catalogs.append(Catalog(**catalog))
-
+        async for catalog in catalogs_db: catalogs.append(Catalog(**catalog))
         return catalogs
 
     async def get(self, catalog_object_id: ObjectId) -> Union[None, Catalog]:
@@ -87,17 +86,17 @@ class CatalogDB(BaseDB):
         catalog_dto.updatedAt = datetime.utcnow()
 
         try: q_result: UpdateResult = await self.collection.update_one(
-            {"_id": catalog_dto.id},
-            {"$set": catalog_dto.dict(by_alias = True, exclude_none = True)})
+            {'_id': catalog_dto.id},
+            {'$set': catalog_dto.dict(by_alias = True, exclude_none = True)})
         except: return False
 
         return q_result
 
     async def delete(self, catalog_object_id: ObjectId) -> Union[None, bool, Catalog]:
-        catalog_db = await self.collection.find_one({"_id": catalog_object_id})
+        catalog_db = await self.collection.find_one({'_id': catalog_object_id})
 
         if catalog_db:
-            try: await self.collection.delete_one({"_id": catalog_object_id})
+            try: await self.collection.delete_one({'_id': catalog_object_id})
             except: return False                         # something was wrong
         else: return None                                # 404
 
@@ -112,10 +111,10 @@ class CatalogDB(BaseDB):
 
         try:
             q_result: UpdateResult = await self.collection.update_one(
-                {"_id": catalog_object_id},
-                {"$set": {
-                    "isEnable":  new_status,
-                    "updatedAt": datetime.utcnow()
+                {'_id': catalog_object_id},
+                {'$set': {
+                    'isEnable':  new_status,
+                    'updatedAt': datetime.utcnow()
                 }}
             )
         except: return False
