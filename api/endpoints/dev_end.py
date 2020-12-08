@@ -1,5 +1,6 @@
 import string
 import random
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, status
 from typing import List, Dict
 from api.db_session import db
@@ -40,6 +41,8 @@ async def seed_db():
             'name': ''.join(random.choices(string.ascii_lowercase, k=6)),
             'size': 0,
             'items': 0,
+            'createdAt': datetime.utcnow(),
+            'updatedAt': None,
             'isEnable': True if random.choice(range(1, 3)) < 2 else False
         }
     )

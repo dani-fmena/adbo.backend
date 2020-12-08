@@ -17,7 +17,6 @@ async def dt_query_params(skip: int = 0, limit: int = 10, field: str = '', sortd
     q: DQueryData = DQueryData(skip = skip, limit = limit, field = None, dir = None, search = None)
 
     if sortdir != '' and field != '':
-        q['dir'] = sortdir
         q['field'] = field
         q['dir'] = pymongo.ASCENDING if sortdir == 'asc' else pymongo.DESCENDING
     if search != '':
