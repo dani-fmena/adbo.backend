@@ -1,5 +1,5 @@
 import pymongo
-from api.utils.types import DQueryData
+from api.utils.definition_types import DQueryData
 
 
 async def dt_query_params(skip: int = 0, limit: int = 10, field: str = '', sortdir: str = '', search: str = '') -> DQueryData:

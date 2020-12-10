@@ -1,31 +1,43 @@
 import string
 import random
+import pymongo
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, status
 from typing import List, Dict
-from api.db_session import db
-
-import pymongo
 from pymongo.database import CollectionInvalid
 from pymongo.collection import Collection
-from repository.db.dbcollections import DBCollections
-
+from api.db_session import db, client
+from api.utils.crypt import hash_pwd
+from dal.db.collections import DBCollections
 
 router = APIRouter()
 
 
-@router.post("/setup", description = 'Setup all the collections and indexes')
+@router.post("/setup", description = 'Setup all the collections (tables) and indexes')
 async def setup_db():
-    # CATALOGS
-    # try:
-    #     await db.create_collection(DBCollections.CATALOGS)
-    # except CollectionInvalid:
-    #     raise HTTPException(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, detail = DBCollections.CATALOGS + 'already exist')
+    await client.drop_database('adbo')
 
+    # region USERS ===============================================================================================
+    try:
+        await db.create_collection(DBCollections.USERS)
+    except CollectionInvalid:
+        raise HTTPException(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, detail = DBCollections.USERS + 'already exist')
+
+    # indexes
+    users_coll: Collection = db.get_collection(DBCollections.USERS)
+    await users_coll.create_index([('username', pymongo.ASCENDING)], unique = True)
+    # endregion ==================================================================================================
+
+    # region CATALOGS ============================================================================================
+    try:
+        await db.create_collection(DBCollections.CATALOGS)
+    except CollectionInvalid:
+        raise HTTPException(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, detail = DBCollections.CATALOGS + 'already exist')
+
+    # indexes
     catalogs_coll: Collection = db.get_collection(DBCollections.CATALOGS)
-    catalogs_coll.create_index([('name', 'text')], unique = True)
-
-    # << Another Table >>
+    await catalogs_coll.create_index([('name', 'text')], unique = True)
+    # endregion ==================================================================================================
 
     return {'msg': 'Database Setup Done'}
 
@@ -34,7 +46,20 @@ async def setup_db():
 async def seed_db():
     lst: List[Dict] = []
 
-    # Catalogs
+    # region USERS ===============================================================================================
+    users_coll: Collection = db.get_collection(DBCollections.USERS)
+    users_coll.insert_one({
+        'username': 'admin',
+        'email': 'admin@uno.dos',
+        'fullName': 'Im The Admin',
+        'pwd': hash_pwd('secret'),
+        'isEnable': True,
+        'createdAt': datetime.utcnow(),
+        'updatedAt': None
+    })
+    # endregion ==================================================================================================
+
+    # region CATALOGS ============================================================================================
     catalogs_coll: Collection = db.get_collection(DBCollections.CATALOGS)
     for n in range(25): lst.append(
         {
@@ -47,5 +72,6 @@ async def seed_db():
         }
     )
     catalogs_coll.insert_many(lst)
+    # endregion ==================================================================================================
 
     return {'msg': 'Database Seeded'}

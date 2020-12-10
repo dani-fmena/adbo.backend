@@ -1,9 +1,9 @@
 from typing import List, Union
 from models.catalog import Catalog
 from .base_serv import BaseService
-from api.utils.types import DQueryData
-from repository.db.catalog_db import CatalogDB
-from services.utils.helpers import chunker
+from api.utils.definition_types import DQueryData
+from dal.db.catalog_db import CatalogDB
+from api.utils.helpers import chunker
 from config.config import CONFIGS
 
 
@@ -43,7 +43,7 @@ class CatalogService(BaseService):
 
         if op_result is False: self.RiseHTTP_DataLayerFail()
         elif op_result.matched_count == 0: self.RiseHTTP_NotFound()
-        elif op_result.modified_count == 0: self.RiseHTTP_DataLayerEmptyOps()
+        elif op_result.modified_count == 0: self.RiseHTTP_DalEmptyOps()
 
         return await self.db_repo.get(catalog_dto.id)
 
@@ -61,7 +61,7 @@ class CatalogService(BaseService):
 
         if op_result is False: self.RiseHTTP_DataLayerFail()
         elif op_result.matched_count == 0: self.RiseHTTP_NotFound()
-        elif op_result.modified_count == 0: self.RiseHTTP_DataLayerEmptyOps()
+        elif op_result.modified_count == 0: self.RiseHTTP_DalEmptyOps()
         else: return True
 
     async def bulk_set_status (self, catalog_ids: List[str], new_status: bool) -> bool:
@@ -72,7 +72,7 @@ class CatalogService(BaseService):
 
             if op_result is False: self.RiseHTTP_DataLayerFail()
             elif op_result.matched_count == 0: self.RiseHTTP_NotFound()
-            elif op_result.modified_count == 0: self.RiseHTTP_DataLayerEmptyOps()
+            elif op_result.modified_count == 0: self.RiseHTTP_DalEmptyOps()
 
         return True
 

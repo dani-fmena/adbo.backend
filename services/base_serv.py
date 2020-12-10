@@ -1,6 +1,6 @@
 from typing import Union, List, Final
 from fastapi import HTTPException, status
-from api.utils.definitions import SDES
+from api.utils.definition_data import SDES, RESPHEADER
 from bson.objectid import ObjectId
 
 
@@ -42,10 +42,21 @@ class BaseService:
     def RiseHTTP_NotFound(self, details: str = SDES.NOTFOUND):
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = details)
 
+    def RaiseHTTP_Unauthorized(self, details: str = SDES.UNAUTHORIZED, is_gen_auth_tk: bool = True):
+        """
+        Rise an unauthorized HTTP exception with the WWW-Authenticate header
+
+        :param details: Custom string for the details of the HTTP exception
+        :param is_gen_auth_tk: If the exception was trying to generate access token or accessing a resource (otherwise)
+        :return:
+        """
+        headers = RESPHEADER.UNAUTHORIZED_BEARER if is_gen_auth_tk else RESPHEADER.UNAUTHORIZED_RESOURCE
+        raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail = details, headers = headers)
+
     def RiseHTTP_BadRequest(self, details: str = SDES.BAD_REQUEST):
         raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST, detail = details)
 
-    def RiseHTTP_DataLayerEmptyOps(self, details: str = SDES.DAL_FAIL_EMPTY):
+    def RiseHTTP_DalEmptyOps(self, details: str = SDES.DAL_FAIL_EMPTY):
         raise HTTPException(status_code = status.HTTP_417_EXPECTATION_FAILED, detail = details)
 
     def RiseHTTP_DataLayerFail(self, details: str = SDES.DAL_FAIL):

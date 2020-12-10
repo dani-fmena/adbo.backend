@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes import adbo_router
-from api.utils.definitions import tags_metadata
+from api.utils.definition_data import tags_metadata
 from config.config import CONFIGS
 
 app = FastAPI(

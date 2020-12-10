@@ -3,15 +3,15 @@ from bson import ObjectId
 from datetime import datetime
 from typing import Union
 from pymongo.results import UpdateResult, InsertOneResult, DeleteResult
-from repository.db.base_db import BaseDB, SanitationMode
+from dal.db.base_db import BaseDB, SanitationMode
 from models.catalog import Catalog
-from api.utils.types import DQueryData
-from .dbcollections import DBCollections
+from api.utils.definition_types import DQueryData
+from .collections import DBCollections
 
 
 class CatalogDB(BaseDB):
     """
-    Database access related to the catalog entity
+    Database MongoDB access related to the catalog entity
     """
 
     def __init__(self):
@@ -40,10 +40,10 @@ class CatalogDB(BaseDB):
         # This kind of pagination have a very poor performance, but allows random navigation through pages.
         catalogs: List = []
 
-        if q['dir'] is None or q['field'] is None:
+        if q['dir'] is None or q['field'] is None:     # with sorting by field
             catalogs_db = self.collection.find().skip(q['skip']).limit(q['limit']) if q['search'] is None \
                 else self.collection.find({'name': {'$regex': '.*' + q['search'] + '.*'}}).limit(q['limit'])
-        else:
+        else:                                           # without sorting
             catalogs_db = self.collection.find().skip(q['skip']).limit(q['limit']).sort(q['field'], q['dir']) if q['search'] is None \
                 else self.collection.find({'name': {'$regex': '.*' + q['search'] + '.*'}}).limit(q['limit']).sort(q['field'], q['dir'])
 
@@ -54,7 +54,7 @@ class CatalogDB(BaseDB):
         """
         Get a specific catalog and try to find it
 
-        :return: The catalog to find or None if ir's missing
+        :return: The catalog to find or None if the id is missing
         """
 
         db_catalog = await self.collection.find_one({"_id": catalog_object_id})

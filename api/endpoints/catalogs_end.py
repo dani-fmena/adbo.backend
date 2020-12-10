@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, Response, status, HTTPException
+from fastapi import APIRouter, Depends, Response, status
 from typing import List
 from models.catalog import Catalog
-from api.extensions.common_query import dt_query_params
-from api.utils.types import DQueryData
+from api.extensions.query_params import dt_query_params
+from api.utils.definition_types import DQueryData
 from services.catalogs_srv import CatalogService
-from api.utils.definitions import SDES
+from api.utils.definition_data import SDES
 
 router = APIRouter()
 

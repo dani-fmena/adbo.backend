@@ -1,7 +1,7 @@
-from pymongo.collection import Collection
-from api.db_session import db
 from enum import Enum
 from typing import Union
+from pymongo.collection import Collection
+from api.db_session import db
 from models.entity import EntityM, Entity, DateEntity
 
 
@@ -20,7 +20,7 @@ class BaseDB:
     def __init__(self, db_collection_name: str):
         self.collection = db.get_collection(db_collection_name)
 
-    def date_sanitation(self, mode: Enum, dto: Union[DateEntity]):
+    def date_sanitation(self, mode: SanitationMode, dto: Union[DateEntity]):
         """
         Depending of the parameter, we reset the corresponding date field in the DTO, so the DTO dont
         inject 'noise' and 'dirt' to the database.

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from viewmodels.vmCategory import CategoryIn
+from models_vm.vmCategory import CategoryIn
 
 router = APIRouter()
 

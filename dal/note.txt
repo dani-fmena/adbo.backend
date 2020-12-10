@@ -1,0 +1,1 @@
+This is the Data Access Layer (DAL) also named as Repository Pattern
