@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, Response, status
 from typing import List
 from models.catalog import Catalog
-from api.extensions.query_params import dt_query_params
+from api.utils.extensions import dt_query_params
 from api.utils.definition_types import DQueryData
 from services.catalogs_srv import CatalogService
+from services.auth_srv import AuthServices
 from api.utils.definition_data import SDES
+from models.user import User
 
 router = APIRouter()
 
@@ -94,3 +96,7 @@ async def bulk_disable_catalogs(catalog_ids: List[str], service: CatalogService 
 async def bulk_remove_catalogs(catalog_ids: List[str], service: CatalogService = Depends()):
     return await service.bulk_remove(catalog_ids)
 
+
+@router.get("/users/me/", response_model=User)
+async def read_users_me(current_user: User = Depends(AuthServices.request_user)):
+    return current_user

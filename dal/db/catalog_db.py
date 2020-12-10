@@ -52,7 +52,7 @@ class CatalogDB(BaseDB):
 
     async def get(self, catalog_object_id: ObjectId) -> Union[None, Catalog]:
         """
-        Get a specific catalog and try to find it
+        Get a specific catalog from database
 
         :return: The catalog to find or None if the id is missing
         """

@@ -39,10 +39,12 @@ class BaseService:
         return bson_list
 
     # Exception methods
-    def RiseHTTP_NotFound(self, details: str = SDES.NOTFOUND):
+    @staticmethod
+    def RiseHTTP_NotFound(details: str = SDES.NOTFOUND):
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = details)
 
-    def RaiseHTTP_Unauthorized(self, details: str = SDES.UNAUTHORIZED, is_gen_auth_tk: bool = True):
+    @staticmethod
+    def RaiseHTTP_Unauthorized(details: str = SDES.UNAUTHORIZED, is_gen_auth_tk: bool = False):
         """
         Rise an unauthorized HTTP exception with the WWW-Authenticate header
 
@@ -53,11 +55,14 @@ class BaseService:
         headers = RESPHEADER.UNAUTHORIZED_BEARER if is_gen_auth_tk else RESPHEADER.UNAUTHORIZED_RESOURCE
         raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail = details, headers = headers)
 
-    def RiseHTTP_BadRequest(self, details: str = SDES.BAD_REQUEST):
+    @staticmethod
+    def RiseHTTP_BadRequest(details: str = SDES.BAD_REQUEST):
         raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST, detail = details)
 
-    def RiseHTTP_DalEmptyOps(self, details: str = SDES.DAL_FAIL_EMPTY):
+    @staticmethod
+    def RiseHTTP_DalEmptyOps( details: str = SDES.DAL_FAIL_EMPTY):
         raise HTTPException(status_code = status.HTTP_417_EXPECTATION_FAILED, detail = details)
 
-    def RiseHTTP_DataLayerFail(self, details: str = SDES.DAL_FAIL):
+    @staticmethod
+    def RiseHTTP_DataLayerFail( details: str = SDES.DAL_FAIL):
         raise HTTPException(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, detail = details)

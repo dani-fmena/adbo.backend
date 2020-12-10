@@ -4,7 +4,7 @@ from api.utils.definition_types import DQueryData
 
 async def dt_query_params(skip: int = 0, limit: int = 10, field: str = '', sortdir: str = '', search: str = '') -> DQueryData:
     """
-    Common extension method for setting pagination information in to the query endpoint. DataTable Query Parameters
+    Common extension method for parametrized data (pagination, sorting and search) in to the query endpoint. DataTable Query Parameters
 
     :param skip: Records for skip
     :param limit: Records to select/retrieve

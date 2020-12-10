@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, Union
 from passlib.context import CryptContext
 from datetime import timedelta, datetime
-from jose import jwt
+from jose import jwt, JWTError
 from config.config import CONFIGS
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
@@ -40,4 +40,16 @@ def mk_jwt_token(claims: dict, expires_delta: Optional[timedelta] = None) -> str
     to_encode.update({'exp': expire})
 
     return jwt.encode(to_encode, CONFIGS.SECRET_KEY, algorithm = CONFIGS.ALGORITHM)
+
+
+def decode_jwt_token(token: str) -> Union[None, dict]:
+    """
+    Try to decode a JWT token in to a dictionary
+    :param token: A signed JWT to be verified
+    :return: A dictionary with the payload data decoded
+    """
+    try:
+        payload = jwt.decode(token, CONFIGS.SECRET_KEY, algorithms = CONFIGS.ALGORITHM)
+    except JWTError: return None
+    return payload
 
