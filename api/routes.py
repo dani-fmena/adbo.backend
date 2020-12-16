@@ -18,7 +18,8 @@ adbo_router.include_router(
     tags=[TAGS.CATALOG],
     responses={
         status.HTTP_404_NOT_FOUND: SDES.NOTFOUND,
-        status.HTTP_403_FORBIDDEN: SDES.FORBIDDEN,
+        status.HTTP_401_UNAUTHORIZED: SDES.UNAUTHORIZED,
+        status.HTTP_403_FORBIDDEN: SDES.FORBIDDEN
     },
 )
 

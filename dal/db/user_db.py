@@ -19,7 +19,7 @@ class UserDB(BaseDB):
         :param with_private_data: If we should retrieve the user private data
         :return: The user to find or None if the username missing
         """
-        db_user = await self.collection.find_one({"username": username})
+        db_user = await self.collection.find_one({'username': username})
 
         if db_user: return UserPwd(**db_user) if with_private_data else User(**db_user)
         else: return None

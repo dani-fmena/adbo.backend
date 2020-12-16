@@ -3,6 +3,7 @@ from passlib.context import CryptContext
 from datetime import timedelta, datetime
 from jose import jwt, JWTError
 from config.config import CONFIGS
+from api.utils.definition_types import DTokenData
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
@@ -42,7 +43,7 @@ def mk_jwt_token(claims: dict, expires_delta: Optional[timedelta] = None) -> str
     return jwt.encode(to_encode, CONFIGS.SECRET_KEY, algorithm = CONFIGS.ALGORITHM)
 
 
-def decode_jwt_token(token: str) -> Union[None, dict]:
+def decode_jwt_token(token: str) -> Union[None, DTokenData]:
     """
     Try to decode a JWT token in to a dictionary
     :param token: A signed JWT to be verified

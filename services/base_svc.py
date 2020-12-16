@@ -1,13 +1,14 @@
-from typing import Union, List, Final
+from typing import Union, List, Final, Dict
 from fastapi import HTTPException, status
 from api.utils.definition_data import SDES, RESPHEADER
+from api.utils.definition_types import DException
 from bson.objectid import ObjectId
 
 
-class BaseService:
+class BaseSvc:
     invalid_id_error_info: Final[str] = 'The ID of the entity isn\'t valid.'
 
-    # Validation methods
+    # region VALIDATIONS ===============================================================================================
     def chk_object_id(self, dto_id: str) -> Union[None, ObjectId]:
         """
         Try to check if the string representation param is an BSON ObjectID, if is ok then convert to ObjectId
@@ -17,7 +18,7 @@ class BaseService:
         """
         try: object_id = ObjectId(dto_id)
         # except InvalidId: self.RiseHTTP_BadRequest(self.invalid_id_error_info)
-        except: self.RiseHTTP_BadRequest(self.invalid_id_error_info)
+        except: self.RiseHTTP_BadRequest(DException(msg = self.invalid_id_error_info))
         else: return object_id
 
     def chk_object_ids_list(self, dto_ids: List[str]) -> Union[None, List[ObjectId]]:
@@ -33,18 +34,19 @@ class BaseService:
         for str_id in dto_ids:
             try: object_id = ObjectId(str_id)
             # except InvalidId: self.RiseHTTP_BadRequest(self.invalid_id_error_info)
-            except: self.RiseHTTP_BadRequest(self.invalid_id_error_info)
+            except: self.RiseHTTP_BadRequest(DException(msg = self.invalid_id_error_info))
             else: bson_list.append(object_id)
 
         return bson_list
+    # endregion ==================================================================================================
 
-    # Exception methods
+    # region EXCEPTIONS ===============================================================================================
     @staticmethod
-    def RiseHTTP_NotFound(details: str = SDES.NOTFOUND):
+    def RiseHTTP_NotFound(details: DException = SDES.NOTFOUND):
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = details)
 
     @staticmethod
-    def RaiseHTTP_Unauthorized(details: str = SDES.UNAUTHORIZED, is_gen_auth_tk: bool = False):
+    def RiseHTTP_Unauthorized(details: DException = SDES.UNAUTHORIZED, is_gen_auth_tk: bool = False):
         """
         Rise an unauthorized HTTP exception with the WWW-Authenticate header
 
@@ -56,13 +58,18 @@ class BaseService:
         raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail = details, headers = headers)
 
     @staticmethod
-    def RiseHTTP_BadRequest(details: str = SDES.BAD_REQUEST):
+    def RiseHTTP_Forbidden(details: DException = SDES.FORBIDDEN_RBAC):
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail = details)
+
+    @staticmethod
+    def RiseHTTP_BadRequest(details: DException = SDES.BAD_REQUEST):
         raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST, detail = details)
 
     @staticmethod
-    def RiseHTTP_DalEmptyOps( details: str = SDES.DAL_FAIL_EMPTY):
+    def RiseHTTP_DalEmptyOps(details: DException = SDES.DAL_FAIL_EMPTY):
         raise HTTPException(status_code = status.HTTP_417_EXPECTATION_FAILED, detail = details)
 
     @staticmethod
-    def RiseHTTP_DataLayerFail( details: str = SDES.DAL_FAIL):
+    def RiseHTTP_DataLayerFail(details: DException = SDES.DAL_FAIL):
         raise HTTPException(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, detail = details)
+    # endregion ==================================================================================================

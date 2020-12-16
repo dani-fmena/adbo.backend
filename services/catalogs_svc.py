@@ -1,14 +1,14 @@
 from typing import List, Union
 from models.catalog import Catalog
-from .base_serv import BaseService
+from .base_svc import BaseSvc
 from api.utils.definition_types import DQueryData
 from dal.db.catalog_db import CatalogDB
 from api.utils.helpers import chunker
 from config.config import CONFIGS
 
 
-class CatalogService(BaseService):
-    """"
+class CatalogSvc(BaseSvc):
+    """
     Catalog services
     """
     db_repo: CatalogDB

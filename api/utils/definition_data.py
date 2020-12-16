@@ -1,4 +1,5 @@
 from typing import Final, Dict
+from api.utils.definition_types import DException
 
 
 class TAGS:
@@ -10,15 +11,16 @@ class TAGS:
 
 class SDES:  # http status code description
     # TODO when i18n is done in the front, return string key likes here, and translate then in the front
-    NOTFOUND: Final[Dict[str, str]] = {"description": "Entity not found"}
-    FORBIDDEN: Final[Dict[str, str]] = {"description": "Forbidden"}
-    UNAUTHORIZED: Final[Dict[str, str]] = {"description": "Could not validate credentials"}
-    CREATED: Final[Dict[str, str]] = {"description": "Created"}
-    NO_CONTENT: Final[Dict[str, str]] = {"description": "There is no content"}
-    BAD_REQUEST: Final[Dict[str, str]] = {"description": "The request data was invalid"}
-    DAL_FAIL: Final[Dict[str, str]] = {"description": "DAL fails the ops"}
-    DAL_FAIL_EMPTY: Final[Dict[str, str]] = {"description": "DAL fails. No records modified"}
-    UNPROCESSABLE_ENTITY: Final[Dict[str, str]] = {"description": "Something is wrong with the input"}
+    NOTFOUND: Final[DException] = DException(msg = 'Entity not found')
+    FORBIDDEN: Final[DException] = DException(msg = 'Forbidden')
+    FORBIDDEN_RBAC: Final[DException] = DException(msg = 'The user isn\'t allowed to make this request')
+    UNAUTHORIZED: Final[DException] = DException(msg = 'Could not validate credentials')
+    CREATED: Final[DException] = DException(msg = 'Created')
+    NO_CONTENT: Final[DException] = DException(msg = 'There is no content')
+    BAD_REQUEST: Final[DException] = DException(msg = 'The request data was invalid')
+    DAL_FAIL: Final[DException] = DException(msg = 'DAL fails the ops')
+    DAL_FAIL_EMPTY: Final[DException] = DException(msg = 'DAL fails. No records modified')
+    UNPROCESSABLE_ENTITY: Final[DException] = DException(msg = 'Something is wrong with the input')
 
 
 class RESPHEADER:  # http response headers

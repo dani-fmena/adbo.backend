@@ -4,11 +4,14 @@ import pymongo
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, status
 from typing import List, Dict
+# from pymongo.results import InsertOneResult
 from pymongo.database import CollectionInvalid
 from pymongo.collection import Collection
 from api.db_session import db, client
 from api.utils.crypt import hash_pwd
 from dal.db.collections import DBCollections
+from api.utils.definition_perms import PG_CATALOG
+from models.rbac import RoleId
 
 router = APIRouter()
 
@@ -39,25 +42,27 @@ async def setup_db():
     await catalogs_coll.create_index([('name', 'text')], unique = True)
     # endregion ==================================================================================================
 
+    # region PERMS ===============================================================================================
+    try:
+        await db.create_collection(DBCollections.ROLES)
+        await db.create_collection(DBCollections.PERMS)
+    except CollectionInvalid:
+        raise HTTPException(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, detail = DBCollections.CATALOGS + 'already exist')
+
+    roles_coll: Collection = db.get_collection(DBCollections.ROLES)
+    await roles_coll.create_index([('name', pymongo.ASCENDING)], unique = True)
+
+    perms_coll: Collection = db.get_collection(DBCollections.PERMS)
+    await perms_coll.create_index([('name', pymongo.ASCENDING)], unique = True)
+    await perms_coll.create_index([('group', pymongo.ASCENDING)], unique = False)
+    # endregion ==================================================================================================
+
     return {'msg': 'Database Setup Done'}
 
 
 @router.post("/seed", description = 'Seeds the collections')
 async def seed_db():
     lst: List[Dict] = []
-
-    # region USERS ===============================================================================================
-    users_coll: Collection = db.get_collection(DBCollections.USERS)
-    users_coll.insert_one({
-        'username': 'admin',
-        'email': 'admin@uno.dos',
-        'fullName': 'Im The Admin',
-        'pwd': hash_pwd('secret'),
-        'isEnable': True,
-        'createdAt': datetime.utcnow(),
-        'updatedAt': None
-    })
-    # endregion ==================================================================================================
 
     # region CATALOGS ============================================================================================
     catalogs_coll: Collection = db.get_collection(DBCollections.CATALOGS)
@@ -71,7 +76,36 @@ async def seed_db():
             'isEnable': True if random.choice(range(1, 3)) < 2 else False
         }
     )
-    catalogs_coll.insert_many(lst)
+    await catalogs_coll.insert_many(lst)
+    # endregion ==================================================================================================
+
+    # region PERMS ===============================================================================================
+    roles_coll: Collection = db.get_collection(DBCollections.ROLES)
+    await roles_coll.insert_one({'name': 'r_admin', 'createdAt': datetime.utcnow(), 'updatedAt': None})
+    await roles_coll.insert_one({'name': 'r_worker', 'createdAt': datetime.utcnow(), 'updatedAt': None})
+    await roles_coll.insert_one({'name': 'r_client', 'createdAt': datetime.utcnow(), 'updatedAt': None})
+
+    role_dict = RoleId(role = 'r_admin').dict()
+    await db.get_collection(DBCollections.PERMS).insert_many([
+        {'name': PG_CATALOG.LIST, 'group': PG_CATALOG.__name__, 'roles': [role_dict]},
+        {'name': PG_CATALOG.CREATE, 'group': PG_CATALOG.__name__, 'roles': [role_dict]},
+        {'name': PG_CATALOG.EDIT, 'group': PG_CATALOG.__name__, 'roles': [role_dict]},
+        {'name': PG_CATALOG.DELETE, 'group': PG_CATALOG.__name__, 'roles': [role_dict]}
+    ])
+    # endregion ==================================================================================================
+
+    # region USERS ===============================================================================================
+    users_coll: Collection = db.get_collection(DBCollections.USERS)
+    await users_coll.insert_one({
+        'username':  'admin',
+        'email':     'admin@uno.dos',
+        'fullName':  'Im The Admin',
+        'pwd':       hash_pwd('secret'),
+        'role':      'r_admin',
+        'isEnable':  True,
+        'createdAt': datetime.utcnow(),
+        'updatedAt': None
+    })
     # endregion ==================================================================================================
 
     return {'msg': 'Database Seeded'}
