@@ -5,6 +5,7 @@ from api.utils.definition_types import DException
 class TAGS:
     AUTH: Final[str] = "Authorization & Authentication"
     CATALOG: Final[str] = "Catalog"
+    USERS: Final[str] = "User"
     CATEGORY: Final[str] = "Category"
     DEV: Final[str] = "Development Only"
 

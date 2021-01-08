@@ -48,7 +48,7 @@ class AuthorizationSvc(BaseSvc):
         if not username: self.RiseHTTP_Unauthorized()
 
         # TODO !!! this query it's extremely frequent, a viable solution may need a redis for cache. The cache layer should not be here
-        user_db: Union[None, UserPwd] = await self.db_user_repo.get(username)
+        user_db: Union[None, UserPwd] = await self.db_user_repo.get_by_username(username)
 
         if not user_db: self.RiseHTTP_NotFound(DException(msg = 'The user owner of the auth access token is missing from our records'))  # the user isn't exist
         if not user_db.isEnable: self.RiseHTTP_BadRequest(DException(msg = 'Inactive user'))  # the user isn't enable

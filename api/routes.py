@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status
-from api.endpoints import auth_end, categories_end, catalogs_end, dev_end
+from api.endpoints import auth_end, users_end, categories_end, catalogs_end, dev_end
 from api.utils.definition_data import SDES, TAGS
 
 
@@ -10,6 +10,17 @@ adbo_router.include_router(
     prefix="/auth",
     tags=[TAGS.AUTH],
     responses={status.HTTP_404_NOT_FOUND: SDES.NOTFOUND},
+)
+
+adbo_router.include_router(
+    users_end.router,
+    prefix="/users",
+    tags=[TAGS.USERS],
+    responses={
+        status.HTTP_404_NOT_FOUND: SDES.NOTFOUND,
+        status.HTTP_401_UNAUTHORIZED: SDES.UNAUTHORIZED,
+        status.HTTP_403_FORBIDDEN: SDES.FORBIDDEN
+    },
 )
 
 adbo_router.include_router(

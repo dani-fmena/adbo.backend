@@ -10,7 +10,7 @@ from pymongo.collection import Collection
 from api.db_session import db, client
 from api.utils.crypt import hash_pwd
 from dal.db.collections import DBCollections
-from api.utils.definition_perms import PG_CATALOG
+from api.utils.definition_perms import PG_CATALOG, PG_USERS
 from models.rbac import RoleId
 
 router = APIRouter()
@@ -87,7 +87,16 @@ async def seed_db():
 
     role_dict = RoleId(role = 'r_admin').dict()
     await db.get_collection(DBCollections.PERMS).insert_many([
+        # USER PERM
+        {'name': PG_USERS.LIST, 'group': PG_USERS.__name__, 'roles': [role_dict]},
+        {'name': PG_USERS.VIEW, 'group': PG_USERS.__name__, 'roles': [role_dict]},
+        {'name': PG_USERS.CREATE, 'group': PG_USERS.__name__, 'roles': [role_dict]},
+        {'name': PG_USERS.EDIT, 'group': PG_USERS.__name__, 'roles': [role_dict]},
+        {'name': PG_USERS.DELETE, 'group': PG_USERS.__name__, 'roles': [role_dict]},
+
+        # CATALOGS PERMS
         {'name': PG_CATALOG.LIST, 'group': PG_CATALOG.__name__, 'roles': [role_dict]},
+        {'name': PG_CATALOG.VIEW, 'group': PG_CATALOG.__name__, 'roles': [role_dict]},
         {'name': PG_CATALOG.CREATE, 'group': PG_CATALOG.__name__, 'roles': [role_dict]},
         {'name': PG_CATALOG.EDIT, 'group': PG_CATALOG.__name__, 'roles': [role_dict]},
         {'name': PG_CATALOG.DELETE, 'group': PG_CATALOG.__name__, 'roles': [role_dict]}

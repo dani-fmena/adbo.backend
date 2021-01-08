@@ -15,9 +15,6 @@ class AuthenticationSvc(BaseSvc):
     def __init__(self):
         self.db_repo = UserDB()
 
-    def __call__(self, perm = ''):
-        print('this is the perm ->' + perm)
-
     async def authenticate_user(self, username: str, pwd: str) -> Union[None, UserPwd]:
         """
         Try to authenticate the user. If can't auth the user then return None. Notice that the returned user contains the secret hashed password
@@ -25,7 +22,7 @@ class AuthenticationSvc(BaseSvc):
         :param pwd: The plain string password
         :return: User if auth, None otherwise
         """
-        user_db: Union[None, UserPwd] = await self.db_repo.get(username, True)
+        user_db: Union[None, UserPwd] = await self.db_repo.get_by_username(username, True)
 
         if not user_db: self.RiseHTTP_NotFound()
         if not chk_pwd(pwd, user_db.pwd): self.RiseHTTP_Unauthorized(is_gen_auth_tk = True)
@@ -39,5 +36,3 @@ class AuthenticationSvc(BaseSvc):
         :return: The generated token
         """
         return AccessToken(access_token = mk_jwt_token({'sub': subject}), token_type = 'bearer')
-
-
